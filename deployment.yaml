@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-dclare-proxy
+  namespace: devmodelix
+  labels:
+    app: dev-dclare
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dev-dclare
+  template:
+    metadata:
+      labels:
+        app: dev-dclare
+    spec:
+      containers:
+      - image: mehmetserefoglu/dclare-sync-proxy
+        name: dev-dclare-pod
+        ports:
+        - containerPort: 55055
+      - image: mehmetserefoglu/dclare-middleware-keycloak
+        name: dev-dclare-middleware-pod
+        ports:
+        - containerPort: 3098
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: devmodelix
+  name: dev-dclare-proxy-service
+spec:
+  selector:
+    app: dev-dclare
+  ports:
+  - name: dev-dclare-service
+    protocol: TCP
+    port: 55055
+    targetPort: 55055
+  type: NodePort
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: devmodelix
+  name: dev-dclare-middleware-service
+spec:
+  selector:
+    app: dev-dclare
+  ports:
+  - name: dev-dclare-service
+    protocol: TCP
+    port: 3098
+    targetPort: 3098
+  type: NodePort
